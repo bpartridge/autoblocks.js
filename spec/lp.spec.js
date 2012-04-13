@@ -2,7 +2,7 @@ require(['underscore','../src/lp','../src/tables','../src/sylvester'],
   function(_, LPProblem, Tables, Sylvester) {
 
   var T = Tables.Table.create;
-  var $M = Sylvester.Matrix, $V = Sylvester.Vector;
+  var $M = Sylvester.Matrix.create, $V = Sylvester.Vector.create;
   
   describe('lp', function() {
     beforeEach(function() {
@@ -18,7 +18,9 @@ require(['underscore','../src/lp','../src/tables','../src/sylvester'],
             _.isEqual(this.actual.data, expected.data);
         },
         toDeepEqual: function(expected) {
-          return _.isEqual(this.actual, expected);
+          // Ignore constructor equality
+          var tempA = _.extend({}, this.actual), tempE = _.extend({}, expected);
+          return _.isEqual(tempA, tempE);
         },
         toApprox: function(expected) {
           return Math.abs(this.actual-expected) < Sylvester.precision;

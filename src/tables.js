@@ -3,7 +3,6 @@
 // Updated to use underscore, and allow method chaining
 define(function(require) {
   
-  // require('lib/backbone/underscore');
   _ = require('underscore');
   
   var Table = function() {

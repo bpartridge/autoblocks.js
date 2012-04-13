@@ -11,43 +11,12 @@ define(function(require) {
     Tables = require('./tables'),
     Table = Tables.Table,
     SortedTable = Tables.SortedTable;
+
+  require('./sylvester-extensions');
   
   var DEFAULT_VALUE = 0;
   var DEBUG = false;
   var MAX_PIVOTS = 10;
-
-  _.extend(Vector.prototype, {
-    // Return a new Vector of the same length as the argument,
-    // whose elements are the elements of this vector at the
-    // indices specified as the elements of the argument;
-    // similar to MATLAB's operator
-    subscript: function(indices) {
-      var indEls = indices.elements || indices;
-      var elements = [];
-      for (var i = 0; i < indEls.length; i++) {
-        var element = this.elements[indEls[i]-1];
-        elements.push(element);
-      }
-      return Vector.create(elements);
-    },
-    
-    setSubscript: function(indices, values) {
-      var _indices = indices.elements || indices;
-      var _values = values.elements || values;
-      var n = _indices.length;
-      for (var i = 0; i < n; i++) {
-        var index = _indices[i];
-        var value = _values[i];
-        this.elements[index-1] = value;
-      }
-    },
-    
-    set: function(index, value) {
-      this.elements[index-1] = value;
-    }
-  });
-
-  console.log(Vector.subscript);
   
   var LPProblem = function() {
     this.vars = new SortedTable();
