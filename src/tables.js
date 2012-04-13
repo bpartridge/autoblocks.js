@@ -1,3 +1,6 @@
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
 
 // Based on http://blog.jcoglan.com/2010/10/18/i-am-a-fast-loop/
 // Updated to use underscore, and allow method chaining
@@ -21,17 +24,26 @@ define(function(require) {
   
   _.extend(Table.prototype, {
     put: function(key, value) {
-      if (!this.data.hasOwnProperty(key)) this.keys.push(key);
+      // TODO: use _.has instead of hasOwnProperty throughout!
+      if (!this.has(key)) this.keys.push(key);
       this.data[key] = value;
       return this;
     },
     
     add: function(key, defaultValue) {
-      if (!this.data.hasOwnProperty(key)) {
+      if (!this.has(key)) {
         this.keys.push(key);
         this.data[key] = defaultValue;
       }
       return this;
+    },
+
+    get: function(key) {
+      return this.data[key];
+    },
+
+    has: function(key) {
+      return _(this.data).has(key);
     },
     
     forEach: function(block, context) {
@@ -64,7 +76,7 @@ define(function(require) {
   
   _.extend(SortedTable.prototype, {
     put: function(key, value) {
-      if (!this.data.hasOwnProperty(key)) {
+      if (!this.has(key)) {
         var index = this._indexOf(key);
         this.keys.splice(index, 0, key);
       }
@@ -73,7 +85,7 @@ define(function(require) {
     },
     
     add: function(key, defaultValue) {
-      if (!this.data.hasOwnProperty(key)) {
+      if (!this.has(key)) {
         var index = this._indexOf(key);
         this.keys.splice(index, 0, key);
         this.data[key] = defaultValue;
@@ -82,7 +94,7 @@ define(function(require) {
     },
     
     remove: function(key) {
-      if (!this.data.hasOwnProperty(key)) return;
+      if (!this.has(key)) return;
       delete this.data[key];
       var index = this._indexOf(key);
       this.keys.splice(index, 1);

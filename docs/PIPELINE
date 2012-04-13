@@ -1,0 +1,37 @@
+PIPELINE
+
+[clientElement] -> [elementSpec] -> [constraint],objective -> [update] -> [clientElement]
+
+elementSpec:
+  id: String
+  centroid:
+    x: Number
+    y: Number
+  width: Number
+  height: Number
+  children: [String] (without relative-position constraints)
+  areaChildren: ?
+    above: [String]?
+    below: [String]?
+    right: [String]?
+    left: [String]?
+  level: Number?
+
+constraint:
+  term:
+    keys: String
+    coeffs: Number
+  maximum: Number
+
+update:
+  id: Number
+  centroid:
+    x: Number
+    y: Number
+
+A Binder registers a number of clientElements, to which it maintains references.
+It can be queried at any time for an array [elementSpec], which should be stable.
+It can also be sent an array [update], which it should update its clientElements.
+
+A Constrainer is responsible for going from an array [elementSpec] to an array [constraint] and objective function.
+It also must be able to reconstruct a set of updates from the variable values resulting from optimization.
