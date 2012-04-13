@@ -1,13 +1,13 @@
 {
   "name" : "autoblocks",
   "description" : "Automatic layout for constrained graphs of HTML elements",
-  "homepage" : "https://github.com/bpartridge/autoblocks",
+  "homepage" : "https://github.com/bpartridge/autoblocks.js",
   "author" : "Brenton Partridge <bapartridge@gmail.com>",
   "keywords" : ["layout", "geometry", "HTML", "linear"],
   "version" : "0.0.0",
   "bugs" : "https://github.com/bpartridge/autoblocks/issues",
   "repositories" : [
-    {"type" : "git", "url" : "git://github.com/bpartridge/autoblocks.git"}
+    {"type" : "git", "url" : "git://github.com/bpartridge/autoblocks.js.git"}
   ],
   "licenses" : [
     {"type" : "LGPL", "url" : "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"}
@@ -18,6 +18,9 @@
   "dependencies" : {
     "requirejs" : ">=0.7.0",
     "amdefine" : ">=0.0.2",
-    "sylvester" : ">=0.0.21"
+    "underscore" : ">=1.3.3"
+  },
+  "devDependencies" : {
+    "jasmine-node" : ">=1.0.24"
   }
 }
