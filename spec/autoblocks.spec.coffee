@@ -42,3 +42,11 @@ define [SRCDIR+'autoblocks', 'underscore'], (Autoblocks, _) ->
         binder.onUpdates [{id:"foo", centroid:{x:5,y:6}}]
         expect(obj.centroid.x).toEqual(5)
         expect(obj.centroid.y).toEqual(6)
+
+    describe 'constrainers', ->
+      for own constrainerName, Constrainer of Autoblocks.Constrainers
+        it "#{constrainerName} should follow the interface", ->
+          c = new Constrainer
+          expect(c).toHaveMethod 'problemFor'
+
+

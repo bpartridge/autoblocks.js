@@ -38,12 +38,22 @@ define(function(require) {
       return this;
     },
 
+    increment: function(key, difference) {
+      this.add(key, 0);
+      this.data[key] += difference;
+      return this;
+    },
+
     get: function(key) {
       return this.data[key];
     },
 
     has: function(key) {
       return _(this.data).has(key);
+    },
+
+    empty: function() {
+      return this.keys.length > 0;
     },
     
     forEach: function(block, context) {

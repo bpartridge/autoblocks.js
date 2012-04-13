@@ -27,7 +27,7 @@
           return expect(inst).not.toBeNull();
         });
       });
-      return describe('binders', function() {
+      describe('binders', function() {
         var Binder, binderName, _ref;
         it('instance should have ObjectBinder as default', function() {
           return expect(inst.binder.constructor).toEqual(Autoblocks.Binders.ObjectBinder);
@@ -69,6 +69,21 @@
           expect(obj.centroid.x).toEqual(5);
           return expect(obj.centroid.y).toEqual(6);
         });
+      });
+      return describe('constrainers', function() {
+        var Constrainer, constrainerName, _ref, _results;
+        _ref = Autoblocks.Constrainers;
+        _results = [];
+        for (constrainerName in _ref) {
+          if (!__hasProp.call(_ref, constrainerName)) continue;
+          Constrainer = _ref[constrainerName];
+          _results.push(it("" + constrainerName + " should follow the interface", function() {
+            var c;
+            c = new Constrainer;
+            return expect(c).toHaveMethod('problemFor');
+          }));
+        }
+        return _results;
       });
     });
   });
