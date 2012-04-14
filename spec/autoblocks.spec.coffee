@@ -61,10 +61,14 @@ define [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
         # singleNode: [
         #   {id:'foo', width:20, height:30}
         # ]
-        parentChild: [
-          {id:'foo', width:0, height:0, children:['bar']},
-          {id:'bar', width:0, height:0}
+        parallelRoots: [
+          {id:'foo', width:5, height:10},
+          {id:'bar', width:10, height:20}
         ]
+        # parentChild: [
+        #   {id:'foo', width:0, height:0, children:['bar']},
+        #   {id:'bar', width:0, height:0}
+        # ]
         # complicated: [
         #   {id:'foo', width:20, height:30, children:['bar','baz']},
         #   {id:'bar', width:40, height:10},
@@ -79,14 +83,15 @@ define [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
           it "#{name} was setup", ->
             c = new Constrainer
             prob = c.problemFor specs
-            expect(prob.vars.keys.length).toEqual (specs.length * 2)
-            console.log util.inspect prob, false, 10, true
+            expect(prob.vars.keys.length).toBeGreaterThan (specs.length-1)
+            # console.log util.inspect prob, false, 10, true
 
           it "#{name} is solvable", ->
             c = new Constrainer
             prob = c.problemFor specs
             prob.solve
               onMessage: (msg, details) -> console.log msg, details
+              randomizePerturbations: true
             prob.vars.forEach (key, val) ->
               expect(isNaN(val)).toBe false
 

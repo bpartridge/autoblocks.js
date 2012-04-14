@@ -16,7 +16,7 @@ define (require) ->
 
     problemFor: (specs) ->
       prob = new LPProblem
-      @fixFirstRoot(prob, specs)
+      @fixRoots(prob, specs)
       @processBreadth(prob, specs)
       @processDepth(prob, specs)
       return prob
@@ -26,12 +26,17 @@ define (require) ->
     depthFor: (spec) -> if @isDepthY then spec.height else spec.width
     breadthFor: (spec) -> if @isDepthY then spec.width else spec.height
 
-    fixFirstRoot: (prob, specs) ->
+    fixRoots: (prob, specs) ->
       roots = SpecUtils.rootsFor specs
+      # Fix the first root's position entirely
       if roots.length
         id = roots[0].id
         @addEqualityConstraint prob, @breadthLabel(id), undefined, 0
         @addEqualityConstraint prob, @depthLabel(id), undefined, 0
+        # Set other roots to have the same depth
+        if roots.length > 1
+          for root in roots[1..]
+            @addEqualityConstraint prob, @depthLabel(root.id), undefined, 0
 
     processBreadth: (prob, specs, objCoeffs) ->
       levels = SpecUtils.levelsFor specs
@@ -44,8 +49,8 @@ define (require) ->
           coeffs = T(@breadthLabel(first.id), 1, @breadthLabel(second.id), -1)
           rhs = -@breadthFor(first)/2 - @breadthFor(second)/2
           prob.updateConstraint(constraintName, coeffs, rhs)
-          prob.objCoeffs.increment @breadthLabel(second.id), 1
-          prob.objCoeffs.increment @breadthLabel(first.id), -1
+          prob.objCoeffs.increment @breadthLabel(second.id), -1
+          prob.objCoeffs.increment @breadthLabel(first.id), 1
 
     processDepth: (prob, specs) ->
       table = SpecUtils.tableFor specs
@@ -61,8 +66,8 @@ define (require) ->
           coeffs = T(@depthLabel(parent.id), 1, @depthLabel(childId), -1)
           rhs = -@depthFor(parent)/2 - @depthFor(child)/2
           prob.updateConstraint(constraintName, coeffs, rhs)
-          prob.objCoeffs.increment @depthLabel(parent.id), -1
-          prob.objCoeffs.increment @depthLabel(childId), 1
+          prob.objCoeffs.increment @depthLabel(parent.id), 1
+          prob.objCoeffs.increment @depthLabel(childId), -1
           recurser(child)
 
         # If there is a single child, clamp their breadth variables

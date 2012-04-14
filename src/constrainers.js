@@ -22,7 +22,7 @@
       TreeConstrainer.prototype.problemFor = function(specs) {
         var prob;
         prob = new LPProblem;
-        this.fixFirstRoot(prob, specs);
+        this.fixRoots(prob, specs);
         this.processBreadth(prob, specs);
         this.processDepth(prob, specs);
         return prob;
@@ -60,13 +60,22 @@
         }
       };
 
-      TreeConstrainer.prototype.fixFirstRoot = function(prob, specs) {
-        var id, roots;
+      TreeConstrainer.prototype.fixRoots = function(prob, specs) {
+        var id, root, roots, _i, _len, _ref2, _results;
         roots = SpecUtils.rootsFor(specs);
         if (roots.length) {
           id = roots[0].id;
           this.addEqualityConstraint(prob, this.breadthLabel(id), void 0, 0);
-          return this.addEqualityConstraint(prob, this.depthLabel(id), void 0, 0);
+          this.addEqualityConstraint(prob, this.depthLabel(id), void 0, 0);
+          if (roots.length > 1) {
+            _ref2 = roots.slice(1);
+            _results = [];
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              root = _ref2[_i];
+              _results.push(this.addEqualityConstraint(prob, this.depthLabel(root.id), void 0, 0));
+            }
+            return _results;
+          }
         }
       };
 
@@ -86,8 +95,8 @@
             coeffs = T(_this.breadthLabel(first.id), 1, _this.breadthLabel(second.id), -1);
             rhs = -_this.breadthFor(first) / 2 - _this.breadthFor(second) / 2;
             prob.updateConstraint(constraintName, coeffs, rhs);
-            prob.objCoeffs.increment(_this.breadthLabel(second.id), 1);
-            return prob.objCoeffs.increment(_this.breadthLabel(first.id), -1);
+            prob.objCoeffs.increment(_this.breadthLabel(second.id), -1);
+            return prob.objCoeffs.increment(_this.breadthLabel(first.id), 1);
           }));
         }
         return _results;
@@ -111,8 +120,8 @@
             coeffs = T(_this.depthLabel(parent.id), 1, _this.depthLabel(childId), -1);
             rhs = -_this.depthFor(parent) / 2 - _this.depthFor(child) / 2;
             prob.updateConstraint(constraintName, coeffs, rhs);
-            prob.objCoeffs.increment(_this.depthLabel(parent.id), -1);
-            prob.objCoeffs.increment(_this.depthLabel(childId), 1);
+            prob.objCoeffs.increment(_this.depthLabel(parent.id), 1);
+            prob.objCoeffs.increment(_this.depthLabel(childId), -1);
             recurser(child);
           }
           if (children.length === 1) {

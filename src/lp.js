@@ -333,6 +333,10 @@ define(function(require) {
       }
       return true;
     },
+
+    objective: function() {
+
+    },
     
     updateProblem: function() {
       var data = this.problem.vars.data;
@@ -344,8 +348,11 @@ define(function(require) {
         }
         else data[name] = 0;
       }
+
+      this.problem.objUpdated = true;
+      this.problem.objective = null;
       
-      this.message('updateProblem', this.problem.vars.data);
+      this.message('updateProblem', [this.problem.vars.data, this.problem.objective]);
     }
   });
   

@@ -95,16 +95,15 @@
       return describe('treeExamples', function() {
         var exampleSpecs;
         exampleSpecs = {
-          parentChild: [
+          parallelRoots: [
             {
               id: 'foo',
-              width: 0,
-              height: 0,
-              children: ['bar']
+              width: 5,
+              height: 10
             }, {
               id: 'bar',
-              width: 0,
-              height: 0
+              width: 10,
+              height: 20
             }
           ]
         };
@@ -119,8 +118,7 @@
               var c, prob;
               c = new Constrainer;
               prob = c.problemFor(specs);
-              expect(prob.vars.keys.length).toEqual(specs.length * 2);
-              return console.log(util.inspect(prob, false, 10, true));
+              return expect(prob.vars.keys.length).toBeGreaterThan(specs.length - 1);
             });
             _results.push(it("" + name + " is solvable", function() {
               var c, prob;
@@ -129,7 +127,8 @@
               prob.solve({
                 onMessage: function(msg, details) {
                   return console.log(msg, details);
-                }
+                },
+                randomizePerturbations: true
               });
               prob.vars.forEach(function(key, val) {
                 return expect(isNaN(val)).toBe(false);
