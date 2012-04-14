@@ -12,7 +12,7 @@ define(function(require) {
   
   var DEFAULT_VALUE = 0;
   var DEBUG = false;
-  var MAX_PIVOTS = 50;
+  var MAX_PIVOTS = 75;
   
   var LPProblem = function() {
     this.vars = new SortedTable();

@@ -4,5 +4,5 @@
 /usr/bin/osascript <<EOT
 tell application "System Events" to tell process "Terminal" to keystroke "k" using command down
 EOT
-node $@ node_modules/jasmine-node/lib/jasmine-node/cli.js --runWithRequireJs --verbose .
+node $@ node_modules/jasmine-node/lib/jasmine-node/cli.js --runWithRequireJs .
 

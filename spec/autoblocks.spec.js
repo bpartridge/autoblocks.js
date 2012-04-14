@@ -4,7 +4,7 @@
 
   SRCDIR = '../src/';
 
-  require([SRCDIR + 'autoblocks', SRCDIR + 'specutils', 'underscore', 'util'], function(Autoblocks, SpecUtils, _, util) {
+  require([SRCDIR + 'autoblocks', SRCDIR + 'specutils', 'underscore', 'util', './mersenne-twister'], function(Autoblocks, SpecUtils, _, util, MersenneTwister) {
     return describe('autoblocks', function() {
       var inst;
       inst = null;
@@ -16,6 +16,32 @@
           },
           toHaveMethod: function(method) {
             return _.isFunction(this.actual[method]);
+          },
+          toCollide: function() {
+            var collision, ids, n;
+            n = this.isNot ? "not " : "";
+            collision = SpecUtils.collide(this.actual);
+            ids = _(collision || this.actual).pluck('id');
+            this.message = function() {
+              return "Expected specs for " + ids + " " + n + "to collide.";
+            };
+            return collision;
+          },
+          toHaveNaNValues: function() {
+            var n, reducer, res;
+            n = this.isNot ? "not " : "";
+            reducer = function(memo, val, key) {
+              if (isNaN(val)) memo[key] = val;
+              return memo;
+            };
+            res = _(this.actual).reduce(reducer, {});
+            this.message = function() {
+              return "Expected keys/indices " + (_(res).keys()) + " " + n + "to be NaN.";
+            };
+            return _(res).size() > 0;
+          },
+          toHaveKey: function(key) {
+            return _(this.actual).has(key);
           }
         });
       });
@@ -92,17 +118,18 @@
         return _results;
       });
       return describe('treeExamples', function() {
-        var exampleSpecs, generateBigTree;
+        var exampleSpecs, generateBigTree, m;
+        m = new MersenneTwister(123);
         generateBigTree = function(size) {
           var curr, i, parent, specs;
           specs = [];
-          for (i = 1; i <= 10; i++) {
-            parent = _(SpecUtils.pickRandom(specs)).first();
+          for (i = 1; 1 <= size ? i <= size : i >= size; 1 <= size ? i++ : i--) {
+            parent = _(SpecUtils.pickRandom(specs, 1, m)).first();
             curr = {
-              id: "id" + i,
-              width: Math.random() * 20,
-              height: Math.random() * 20
+              id: "id" + i
             };
+            curr.width = Math.floor(m.random() * 10 + 10);
+            curr.height = Math.floor(m.random() * 10 + 10);
             specs.push(curr);
             if (parent != null) {
               (parent.children || (parent.children = [])).push(curr.id);
@@ -163,7 +190,9 @@
               height: 30
             }
           ],
-          big: generateBigTree(10)
+          big1: generateBigTree(10),
+          big2: generateBigTree(10),
+          big3: generateBigTree(15)
         };
         describe('constrainer', function() {
           var Constrainer;
@@ -176,20 +205,25 @@
               return expect(prob.vars.keys.length).toBe(specs.length * 2);
             });
             return it("" + name + " is solvable", function() {
-              var c, nonzero, prob;
+              var c, nonzero, objValues, prob;
               c = new Constrainer;
               prob = c.problemFor(specs);
+              objValues = [];
               prob.solve({
+                onMessage: function(msg, details) {
+                  var obj, vars;
+                  if (msg === 'updateProblem') {
+                    vars = details[0], obj = details[1];
+                    return objValues.push(obj);
+                  }
+                },
                 randomizePerturbations: false
               });
-              prob.vars.forEach(function(key, val) {
-                return expect(isNaN(val)).toBe(false);
-              });
+              expect(prob.vars.data).not.toHaveNaNValues();
               if (specs.length > 1) {
-                nonzero = _(prob.vars.data).chain().values().any(function(val) {
+                return nonzero = _(prob.vars.data).chain().values().any(function(val) {
                   return val > 0;
                 }).value();
-                return expect(nonzero).toBe(true);
               }
             });
           });
@@ -201,16 +235,23 @@
               specs = _.clone(specs);
               inst.bind(specs);
               inst.update();
-              expect(_(specs).all(function(spec) {
-                return spec.centroid != null;
-              })).toBe(true);
+              _(specs).all(function(spec) {
+                return expect(spec).toHaveKey('centroid');
+              });
               if (specs.length > 1) {
                 nonzero = _(specs).any(function(spec) {
                   return spec.centroid.x > 0 || spec.centroid.y > 0;
                 });
                 expect(nonzero).toBe(true);
               }
-              return expect(SpecUtils.collide(specs)).toBe(false);
+              expect(_(specs).map(function(spec) {
+                return spec.centroid.x;
+              })).not.toHaveNaNValues();
+              expect(_(specs).map(function(spec) {
+                return spec.centroid.y;
+              })).not.toHaveNaNValues();
+              expect(specs).not.toCollide();
+              return util.puts(SpecUtils.drawToString(specs, 80));
             });
           });
         });

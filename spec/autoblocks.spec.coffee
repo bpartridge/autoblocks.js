@@ -1,6 +1,7 @@
 SRCDIR = '../src/'
 
-require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autoblocks, SpecUtils, _, util) ->
+require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util', './mersenne-twister'], 
+(Autoblocks, SpecUtils, _, util, MersenneTwister) ->
   describe 'autoblocks', ->
     # inst is the default instance, it can be overridden in suites
     inst = null
@@ -10,6 +11,22 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
         toDeepEqual: (expected) -> _.isEqual(this.actual, expected)
         toHaveMethod: (method) ->
           return _.isFunction(this.actual[method])
+        toCollide: -> 
+          n = if @isNot then "not " else ""
+          collision = SpecUtils.collide @actual
+          ids = _(collision || @actual).pluck 'id'
+          @message = -> "Expected specs for #{ids} #{n}to collide."
+          return collision
+        toHaveNaNValues: ->
+          n = if @isNot then "not " else ""
+          reducer = (memo, val, key) -> 
+            if isNaN(val) then memo[key] = val
+            return memo
+          res = _(@actual).reduce reducer, {}
+          @message = -> "Expected keys/indices #{_(res).keys()} #{n}to be NaN."
+          return _(res).size() > 0
+        toHaveKey: (key) ->
+          return _(@actual).has key
 
     describe 'instance', ->
       it 'should not be null', ->
@@ -54,11 +71,14 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
           expect(prob.objCoeffs.empty()).toEqual true
 
     describe 'treeExamples', ->
+      m = new MersenneTwister(123)
       generateBigTree = (size) ->
         specs = []
-        for i in [1..10]
-          parent = _(SpecUtils.pickRandom specs).first()
-          curr = {id:"id#{i}", width:Math.random()*20, height:Math.random()*20}
+        for i in [1..size]
+          parent = _(SpecUtils.pickRandom specs, 1, m).first()
+          curr = {id:"id#{i}"}
+          curr.width = Math.floor m.random()*10 + 10
+          curr.height = Math.floor m.random()*10 + 10
           specs.push curr
           if parent? then (parent.children ||= []).push curr.id
         # console.log specs
@@ -83,7 +103,9 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
           {id:'baz', width:10, height:40, children:['bazz']},
           {id:'bazz', width:30, height:30}
         ]
-        big: generateBigTree(10)
+        big1: generateBigTree(10)
+        big2: generateBigTree(10)
+        big3: generateBigTree(15)
 
       describe 'constrainer', ->
         Constrainer = Autoblocks.Constrainers.TreeConstrainer
@@ -98,25 +120,26 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
           it "#{name} is solvable", ->
             c = new Constrainer
             prob = c.problemFor specs
-            # objValues = []
+            objValues = []
             prob.solve
-              # onMessage: (msg, details) ->
-              #   if msg == 'updateProblem'
-              #     [vars, obj] = details
-              #     objValues.push obj
+              onMessage: (msg, details) ->
+                if msg == 'updateProblem'
+                  [vars, obj] = details
+                  objValues.push obj
               randomizePerturbations: false
 
-            prob.vars.forEach (key, val) ->
-              expect(isNaN(val)).toBe false
+            expect(prob.vars.data).not.toHaveNaNValues()
 
             if specs.length > 1
               nonzero = _(prob.vars.data).chain()
                 .values().any((val) -> val > 0).value()
-              expect(nonzero).toBe true
+              # expect(nonzero).toBe true
 
-            # console.log objValues, prob.vars
+            # console.log objValues
             # console.log util.inspect prob, false, 10, true
-            # console.log prob.objective
+            # console.log ''
+            # console.log specs
+            # console.log util.inspect prob.constraints.data, false, 10, true
 
       describe 'full', ->
         _(exampleSpecs).each (specs, name) ->
@@ -125,11 +148,15 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
             inst.bind specs
             inst.update()
 
-            expect(_(specs).all (spec) -> spec.centroid?).toBe true
+            _(specs).all (spec) -> expect(spec).toHaveKey 'centroid'
             if specs.length > 1
               nonzero = _(specs).any (spec) -> 
                 spec.centroid.x > 0 || spec.centroid.y > 0
               expect(nonzero).toBe true
 
-            expect(SpecUtils.collide specs).toBe false
-            
+            expect(_(specs).map (spec) -> spec.centroid.x).not.toHaveNaNValues()
+            expect(_(specs).map (spec) -> spec.centroid.y).not.toHaveNaNValues()
+            expect(specs).not.toCollide()
+
+            util.puts SpecUtils.drawToString specs, 80
+

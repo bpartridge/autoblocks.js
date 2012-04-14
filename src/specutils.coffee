@@ -19,15 +19,16 @@ define (require) ->
           for second, j in array[(i+1)..]
             func first, second, i, i+1+j
 
-  utils.pickRandom = (array, count) ->
+  utils.pickRandom = (array, count, randomObj) ->
     count ?= 1
-    return (array[Math.floor(Math.random()*array.length)] for i in [1..count])
+    randomOb ?= Math
+    return (array[Math.floor(randomObj.random()*array.length)] for i in [1..count])
 
   utils.collide = (specs) ->
     pairs = []
     utils.forAllPairs specs, (first, second) ->
       pairs.push [first, second]
-    return _(pairs).any (pair) ->
+    return _(pairs).find (pair) ->
       [first, second] = pair
       dx = Math.abs(first.centroid.x - second.centroid.x)
       dy = Math.abs(first.centroid.y - second.centroid.y)
@@ -65,5 +66,85 @@ define (require) ->
     for root in roots
       recurser(root, 0)
     return levels
+
+  utils.boundsFor = (specs) ->
+    dims = {}
+    dims.minX = _.min _(specs).map (spec) -> spec.centroid.x - spec.width/2
+    dims.maxX = _.max _(specs).map (spec) -> spec.centroid.x + spec.width/2
+    dims.minY = _.min _(specs).map (spec) -> spec.centroid.y - spec.height/2
+    dims.maxY = _.max _(specs).map (spec) -> spec.centroid.y + spec.height/2
+    dims.width = dims.maxX - dims.minX
+    dims.height = dims.maxY - dims.minY
+    return dims
+
+  utils.specContains = (spec, point) ->
+    dx = Math.abs(point.x - spec.centroid.x)
+    dy = Math.abs(point.y - spec.centroid.y)
+    return dx < spec.width/2 && dy < spec.height/2
+
+  # For fun and testing: Creates a string which, drawn to the console,
+  # represents the specs in ASCII art
+  # Inspired by https://github.com/davglass/nodejs-termcolors/blob/master/lib/termcolors.js
+  utils.drawToString = (specs, cols) ->
+    if not specs.length then return ""
+
+    # Determine dimensions
+    COLS_PER_ROW = 5
+    dims = utils.boundsFor specs
+    dims.width += 1
+    dims.height += 1
+    rcOverXY = cols / dims.width
+    rows = Math.ceil(rcOverXY * dims.height / COLS_PER_ROW)
+
+    # Define a translation function, returning {x,y}
+    rc2xy = (r, c) ->
+      x = c / rcOverXY + dims.minX
+      y = r*COLS_PER_ROW / rcOverXY + dims.minY
+      return {x,y}
+
+    ids = _(specs).pluck 'id'
+    termColors = _.flatten _([31..37]).map (i) ->
+      ["\033[#{i}m"] # ,"\033[1;#{i}m"]
+
+    colorForId = (id) ->
+      idx = _(ids).indexOf id
+      if (idx >= termColors.length) then idx = 0
+      return termColors[idx]
+    letterForId = (id) ->
+      idx = _(ids).indexOf id
+      letter = String.fromCharCode(65 + idx || 40)
+    CLEAR = '\033[m'
+    BG = '\033[1;47m'
+
+    strings = []
+    # Start with row describing hierarchy
+    for spec in specs
+      strings.push colorForId spec.id
+      strings.push spec.id
+      if spec.children then strings.push CLEAR+"->"
+      strings.push _(spec.children || []).
+        map((childId)->colorForId(childId)+childId+CLEAR).join ','
+      strings.push CLEAR+'  '
+    strings.push CLEAR+'\n'
+
+    # Now print the grid
+    for r in [0..rows-1]
+      for c in [0..cols-1]
+        # console.log [r, c, rc2xy(r,c)]
+        pt = rc2xy(r,c)
+        contained = _(specs).filter (spec) -> utils.specContains spec, pt
+        if contained.length > 0
+          if contained.length > 1 
+            strings.push BG
+          strings.push colorForId contained[0].id
+          strings.push letterForId contained[0].id
+          if contained.length > 1 then strings.push CLEAR
+        else
+          strings.push ' '
+
+      strings.push CLEAR+'\n'
+
+    return strings.join ''
+    # return [rows, cols, dims]
 
   return utils
