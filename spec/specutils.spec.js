@@ -4,9 +4,19 @@
   SRCDIR = '../src/';
 
   require([SRCDIR + 'specutils', 'underscore'], function(SpecUtils, _) {
-    describe('specutils pairs', function() {
-      var source, spy;
+    return describe('specutils', function() {
+      var source, specs, spy;
       source = ['a', 'b', 'c'];
+      specs = [
+        {
+          id: 'foo',
+          children: ['bar', 'baz']
+        }, {
+          id: 'bar'
+        }, {
+          id: 'baz'
+        }
+      ];
       spy = null;
       beforeEach(function() {
         return spy = jasmine.createSpy();
@@ -23,23 +33,10 @@
         SpecUtils.forAllPairs(source, spy);
         return expect(spy.argsForCall).toEqual([['a', 'b', 0, 1], ['a', 'c', 0, 2], ['b', 'c', 1, 2]]);
       });
-      return it('should perform forAllPairs ordered', function() {
+      it('should perform forAllPairs ordered', function() {
         SpecUtils.forAllPairs(source, spy, true);
         return expect(spy.argsForCall).toEqual([['a', 'b', 0, 1], ['a', 'c', 0, 2], ['b', 'a', 1, 0], ['b', 'c', 1, 2], ['c', 'a', 2, 0], ['c', 'b', 2, 1]]);
       });
-    });
-    return describe('specutils specs', function() {
-      var specs;
-      specs = [
-        {
-          id: 'foo',
-          children: ['bar', 'baz']
-        }, {
-          id: 'bar'
-        }, {
-          id: 'baz'
-        }
-      ];
       it('should do rootsFor', function() {
         var roots;
         roots = SpecUtils.rootsFor(specs);

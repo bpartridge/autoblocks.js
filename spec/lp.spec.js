@@ -197,6 +197,8 @@ require(['underscore','../src/lp','../src/tables','../src/sylvester'],
         prob.solve();
         expect(prob.vars.data['x2']).toEqual(1);
         expect(prob.vars.data['x1']).toEqual(2);
+        expect(prob.objUpdated).toBe(true)
+        expect(prob.objective).toEqual(-1);
       })
     })
     
@@ -210,6 +212,8 @@ require(['underscore','../src/lp','../src/tables','../src/sylvester'],
         expect(prob.vars.data['x1']).toApprox(0)
         expect(prob.vars.data['x2']).toApprox(1.0/2.0)
         expect(prob.vars.data['x3']).toApprox(3.0/2.0)
+        expect(prob.objUpdated).toBe(true)
+        expect(prob.objective).toApprox(-3)
       })
       
       it('should do Exercise 7.5', function() {
@@ -219,6 +223,8 @@ require(['underscore','../src/lp','../src/tables','../src/sylvester'],
         prob.updateConstraint('w2',{x1:2, x2:-1, x3:2},4)
         prob.solve()
         expect(prob.vars.data).toDeepEqual({x1:0, x2:1, x3:0})
+        expect(prob.objUpdated).toBe(true)
+        expect(prob.objective).toApprox(-3)
       })
     })
     

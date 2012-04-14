@@ -12,7 +12,7 @@ define(function(require) {
   
   var DEFAULT_VALUE = 0;
   var DEBUG = false;
-  var MAX_PIVOTS = 20;
+  var MAX_PIVOTS = 50;
   
   var LPProblem = function() {
     this.vars = new SortedTable();
@@ -217,6 +217,8 @@ define(function(require) {
         this.muStar = maxNon; this.muStarIndex = jMax; this.muStarBasic = false;
       }
       this.message('computedOptimalPerturbation', this.muStar);
+
+      this.updateProblem();
     },
     
     solve: function() {
@@ -329,24 +331,23 @@ define(function(require) {
       }
       return true;
     },
-
-    objective: function() {
-
-    },
     
     updateProblem: function() {
       var data = this.problem.vars.data;
+      var objective = 0;
       
       for (var idxVar = 0; idxVar < this.nNon; idxVar++) {
         var name = this.problem.vars.keys[idxVar];
         if (this.Basic.indexOf(idxVar+1)) {
-          data[name] = this.xStar.elements[idxVar];
+          var val = data[name] = this.xStar.elements[idxVar];
+          var objCoeff = this.problem.objCoeffs.data[name] || 0;
+          objective += val * objCoeff;
         }
         else data[name] = 0;
       }
 
       this.problem.objUpdated = true;
-      this.problem.objective = null;
+      this.problem.objective = objective;
       
       this.message('updateProblem', [this.problem.vars.data, this.problem.objective]);
     }

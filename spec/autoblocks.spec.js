@@ -4,7 +4,7 @@
 
   SRCDIR = '../src/';
 
-  require([SRCDIR + 'autoblocks', 'underscore', 'util'], function(Autoblocks, _, util) {
+  require([SRCDIR + 'autoblocks', SRCDIR + 'specutils', 'underscore', 'util'], function(Autoblocks, SpecUtils, _, util) {
     return describe('autoblocks', function() {
       var inst;
       inst = null;
@@ -147,19 +147,16 @@
           ]
         };
         describe('constrainer', function() {
-          var Constrainer, name, specs, _results;
+          var Constrainer;
           Constrainer = Autoblocks.Constrainers.TreeConstrainer;
-          _results = [];
-          for (name in exampleSpecs) {
-            if (!__hasProp.call(exampleSpecs, name)) continue;
-            specs = exampleSpecs[name];
+          return _(exampleSpecs).each(function(specs, name) {
             it("" + name + " was setup", function() {
               var c, prob;
               c = new Constrainer;
               prob = c.problemFor(specs);
               return expect(prob.vars.keys.length).toBe(specs.length * 2);
             });
-            _results.push(it("" + name + " is solvable", function() {
+            return it("" + name + " is solvable", function() {
               var c, prob;
               c = new Constrainer;
               prob = c.problemFor(specs);
@@ -169,9 +166,8 @@
               return prob.vars.forEach(function(key, val) {
                 return expect(isNaN(val)).toBe(false);
               });
-            }));
-          }
-          return _results;
+            });
+          });
         });
         return describe('full', function() {
           var name, specs, _results;

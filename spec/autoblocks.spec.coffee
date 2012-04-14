@@ -1,6 +1,6 @@
 SRCDIR = '../src/'
 
-require [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
+require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autoblocks, SpecUtils, _, util) ->
   describe 'autoblocks', ->
     # inst is the default instance, it can be overridden in suites
     inst = null
@@ -76,7 +76,7 @@ require [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
       describe 'constrainer', ->
         Constrainer = Autoblocks.Constrainers.TreeConstrainer
 
-        for own name, specs of exampleSpecs
+        _(exampleSpecs).each (specs, name) ->
           it "#{name} was setup", ->
             c = new Constrainer
             prob = c.problemFor specs
@@ -86,13 +86,20 @@ require [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
           it "#{name} is solvable", ->
             c = new Constrainer
             prob = c.problemFor specs
+            # objValues = []
             prob.solve
-              # onMessage: (msg, details) -> console.log msg, details
+              # onMessage: (msg, details) ->
+              #   if msg == 'updateProblem'
+              #     [vars, obj] = details
+              #     objValues.push obj
               randomizePerturbations: true
+
             prob.vars.forEach (key, val) ->
               expect(isNaN(val)).toBe false
 
+            # console.log objValues, prob.vars
             # console.log util.inspect prob, false, 10, true
+            # console.log prob.objective
 
       describe 'full', ->
         for own name, specs of exampleSpecs

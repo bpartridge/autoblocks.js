@@ -2,8 +2,13 @@ SRCDIR = '../src/'
 
 require [SRCDIR+'specutils', 'underscore'], (SpecUtils, _) ->
 
-  describe 'specutils pairs', ->
+  describe 'specutils', ->
     source = ['a','b','c']
+    specs = [
+      {id:'foo', children:['bar','baz']},
+      {id:'bar'},
+      {id:'baz'}
+    ]
     spy = null
     beforeEach ->
       spy = jasmine.createSpy()
@@ -29,13 +34,6 @@ require [SRCDIR+'specutils', 'underscore'], (SpecUtils, _) ->
         ['b','a',1,0], ['b','c',1,2],
         ['c','a',2,0], ['c','b',2,1]
       ]
-
-  describe 'specutils specs', ->
-    specs = [
-      {id:'foo', children:['bar','baz']},
-      {id:'bar'},
-      {id:'baz'}
-    ]
 
     it 'should do rootsFor', ->
       roots = SpecUtils.rootsFor specs
