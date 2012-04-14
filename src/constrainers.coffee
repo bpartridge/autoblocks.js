@@ -16,6 +16,7 @@ define (require) ->
 
     problemFor: (specs) ->
       prob = new LPProblem
+      @fixFirstRoot(prob, specs)
       @processBreadth(prob, specs)
       @processDepth(prob, specs)
       return prob
@@ -25,11 +26,18 @@ define (require) ->
     depthFor: (spec) -> if @isDepthY then spec.height else spec.width
     breadthFor: (spec) -> if @isDepthY then spec.width else spec.height
 
+    fixFirstRoot: (prob, specs) ->
+      roots = SpecUtils.rootsFor specs
+      if roots.length
+        id = roots[0].id
+        @addEqualityConstraint prob, @breadthLabel(id), undefined, 0
+        @addEqualityConstraint prob, @depthLabel(id), undefined, 0
+
     processBreadth: (prob, specs, objCoeffs) ->
       levels = SpecUtils.levelsFor specs
-      for level in levels
-        SpecUtils.forConsecPairs level, (first, second, i) ->
-          constraintName = "level#{level}_constraint#{i}"
+      for level, iLevel in levels
+        SpecUtils.forConsecPairs level, (first, second) =>
+          constraintName = "level#{iLevel}::ordering::#{first.id}::#{second.id}"
           ###
           1.centroid.y + 1.height/2 < 2.centroid.y - 2.height/2
           ###
@@ -42,10 +50,11 @@ define (require) ->
     processDepth: (prob, specs) ->
       table = SpecUtils.tableFor specs
       constraintNum = 0
-      recurser = (parent) ->
-        for childId in (parent.children || [])
+      recurser = (parent) =>
+        children = (parent.children || [])
+        for childId in children
           child = table.get childId
-          constraintName = "children#{constraintNum++}"
+          constraintName = "childDepth::#{parent.id}::#{childId}"
           ###
           parent.centroid.x + parent.width/2 < child.centroid.x - child.width/2
           ###
@@ -56,8 +65,30 @@ define (require) ->
           prob.objCoeffs.increment @depthLabel(childId), 1
           recurser(child)
 
+        # If there is a single child, clamp their breadth variables
+        if children.length == 1
+          childId = children[0]
+          @addEqualityConstraint prob, @breadthLabel(parent.id), @breadthLabel(childId)
+
+        # If there are multiple children, ensure the parent is between them
+        if children.length > 2
+          firstId = children[0]
+          lastId = children[children.length-1]
+          # TODO
+
+
       for root in SpecUtils.rootsFor specs
         recurser(root)
+
+    addEqualityConstraint: (prob, label0, label1, value) ->
+      value ?= 0
+      for [mult,suffix] in [[1,'Pos'], [-1,'Neg']]
+        name = "equality::#{label0}::#{label1 || 'value::' + value}::#{suffix}"
+        coeffs = T(label0, mult)
+        if label1? then coeffs
+        .put label1, mult*-1
+        prob.updateConstraint(name, coeffs, mult*value)
+
 
   return {
     TreeConstrainer: TreeConstrainer

@@ -56,7 +56,7 @@
       var allChildren, allIds, rootIds;
       allChildren = _(specs).chain().pluck('children').flatten().value();
       allIds = _(specs).pluck('id');
-      rootIds = _(allIds).without(allChildren);
+      rootIds = _(allIds).difference(allChildren);
       return specs.filter(function(spec) {
         return rootIds.indexOf(spec.id) >= 0;
       });
@@ -77,7 +77,7 @@
       levels = [];
       recurser = function(spec, level) {
         var child, childId, _i, _len, _ref2, _results;
-        if (levels.length < level) {
+        if (level >= levels.length) {
           levels[level] = [spec];
         } else {
           levels[level].push(spec);

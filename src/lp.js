@@ -16,12 +16,12 @@ define(function(require) {
   
   var DEFAULT_VALUE = 0;
   var DEBUG = false;
-  var MAX_PIVOTS = 10;
+  var MAX_PIVOTS = 20;
   
   var LPProblem = function() {
     this.vars = new SortedTable();
     this.constraints = new SortedTable();
-    this.constraintsUpdated = new SortedTable();
+    // this.constraintsUpdated = new SortedTable();
     this.objCoeffs = new SortedTable();
     this.objUpdated = false;
     this.objective = DEFAULT_VALUE;
@@ -41,7 +41,7 @@ define(function(require) {
         coeffs: coeffTable, rhs: leqRhs
       }
       this.constraints.put(name, constraint);
-      this.constraintsUpdated.put(name, true);
+      // this.constraintsUpdated.put(name, true);
       coeffTable.forEach(function(key, value) {
         this.vars.add(key, DEFAULT_VALUE);
       }, this);
@@ -345,7 +345,7 @@ define(function(require) {
         else data[name] = 0;
       }
       
-      this.message('updateProblem', this.problem.vars);
+      this.message('updateProblem', this.problem.vars.data);
     }
   });
   

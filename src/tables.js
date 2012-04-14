@@ -53,7 +53,7 @@ define(function(require) {
     },
 
     empty: function() {
-      return this.keys.length > 0;
+      return this.keys.length == 0;
     },
     
     forEach: function(block, context) {

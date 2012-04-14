@@ -32,3 +32,21 @@ define [SRCDIR+'specutils', 'underscore'], (SpecUtils, _) ->
         ['b','a',1,0], ['b','c',1,2],
         ['c','a',2,0], ['c','b',2,1]
       ]
+
+  describe 'specutils specs', ->
+    specs = [
+      {id:'foo', children:['bar','baz']},
+      {id:'bar'},
+      {id:'baz'}
+    ]
+
+    it 'should do rootsFor', ->
+      roots = SpecUtils.rootsFor specs
+      expect(roots.length).toBe 1
+      expect(roots[0]).toBe specs[0]
+
+    it 'should do levelsFor', ->
+      levels = SpecUtils.levelsFor specs
+      expect(levels.length).toBe 2
+      expect(levels[0].length).toBe 1
+      expect(levels[1].length).toBe 2

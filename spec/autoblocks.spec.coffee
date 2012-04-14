@@ -3,7 +3,7 @@ if (typeof define != 'function' && module)
 
 SRCDIR = '../../../../src/' # TODO: this is a horrid hack
 
-define [SRCDIR+'autoblocks', 'underscore'], (Autoblocks, _) ->
+define [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
   describe 'autoblocks', ->
     # inst is the default instance, it can be overridden in suites
     inst = null
@@ -49,4 +49,45 @@ define [SRCDIR+'autoblocks', 'underscore'], (Autoblocks, _) ->
           c = new Constrainer
           expect(c).toHaveMethod 'problemFor'
 
+        it "#{constrainerName} should handle a blank spec list", ->
+          c = new Constrainer
+          prob = c.problemFor([])
+          expect(prob.vars.empty()).toEqual true
+          expect(prob.objCoeffs.empty()).toEqual true
 
+    describe 'treeExamples', ->
+      exampleSpecs =
+        # empty: []
+        # singleNode: [
+        #   {id:'foo', width:20, height:30}
+        # ]
+        parentChild: [
+          {id:'foo', width:0, height:0, children:['bar']},
+          {id:'bar', width:0, height:0}
+        ]
+        # complicated: [
+        #   {id:'foo', width:20, height:30, children:['bar','baz']},
+        #   {id:'bar', width:40, height:10},
+        #   {id:'baz', width:10, height:40, children:['bazz']},
+        #   {id:'bazz', width:30, height:30}
+        # ]
+
+      describe 'constrainer', ->
+        Constrainer = Autoblocks.Constrainers.TreeConstrainer
+
+        for own name, specs of exampleSpecs
+          it "#{name} was setup", ->
+            c = new Constrainer
+            prob = c.problemFor specs
+            expect(prob.vars.keys.length).toEqual (specs.length * 2)
+            console.log util.inspect prob, false, 10, true
+
+          it "#{name} is solvable", ->
+            c = new Constrainer
+            prob = c.problemFor specs
+            prob.solve
+              onMessage: (msg, details) -> console.log msg, details
+            prob.vars.forEach (key, val) ->
+              expect(isNaN(val)).toBe false
+
+            console.log util.inspect prob, false, 10, true

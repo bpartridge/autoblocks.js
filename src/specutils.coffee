@@ -27,7 +27,8 @@ define (require) ->
   utils.rootsFor = (specs) ->
     allChildren = _(specs).chain().pluck('children').flatten().value()
     allIds = _(specs).pluck('id')
-    rootIds = _(allIds).without(allChildren)
+    rootIds = _(allIds).difference(allChildren)
+    # console.log allIds, allChildren, rootIds
     return specs.filter (spec) -> rootIds.indexOf(spec.id) >= 0
 
   utils.tableFor = (specs) ->
@@ -42,7 +43,8 @@ define (require) ->
     roots = utils.rootsFor specs
     levels = []
     recurser = (spec, level) ->
-      if levels.length < level
+      # console.log "recurser", spec, level, levels.length
+      if level >= levels.length
         levels[level] = [spec]
       else
         levels[level].push spec

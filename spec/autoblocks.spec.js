@@ -6,7 +6,7 @@
 
   SRCDIR = '../../../../src/';
 
-  define([SRCDIR + 'autoblocks', 'underscore'], function(Autoblocks, _) {
+  define([SRCDIR + 'autoblocks', 'underscore', 'util'], function(Autoblocks, _, util) {
     return describe('autoblocks', function() {
       var inst;
       inst = null;
@@ -70,20 +70,75 @@
           return expect(obj.centroid.y).toEqual(6);
         });
       });
-      return describe('constrainers', function() {
+      describe('constrainers', function() {
         var Constrainer, constrainerName, _ref, _results;
         _ref = Autoblocks.Constrainers;
         _results = [];
         for (constrainerName in _ref) {
           if (!__hasProp.call(_ref, constrainerName)) continue;
           Constrainer = _ref[constrainerName];
-          _results.push(it("" + constrainerName + " should follow the interface", function() {
+          it("" + constrainerName + " should follow the interface", function() {
             var c;
             c = new Constrainer;
             return expect(c).toHaveMethod('problemFor');
+          });
+          _results.push(it("" + constrainerName + " should handle a blank spec list", function() {
+            var c, prob;
+            c = new Constrainer;
+            prob = c.problemFor([]);
+            expect(prob.vars.empty()).toEqual(true);
+            return expect(prob.objCoeffs.empty()).toEqual(true);
           }));
         }
         return _results;
+      });
+      return describe('treeExamples', function() {
+        var exampleSpecs;
+        exampleSpecs = {
+          parentChild: [
+            {
+              id: 'foo',
+              width: 0,
+              height: 0,
+              children: ['bar']
+            }, {
+              id: 'bar',
+              width: 0,
+              height: 0
+            }
+          ]
+        };
+        return describe('constrainer', function() {
+          var Constrainer, name, specs, _results;
+          Constrainer = Autoblocks.Constrainers.TreeConstrainer;
+          _results = [];
+          for (name in exampleSpecs) {
+            if (!__hasProp.call(exampleSpecs, name)) continue;
+            specs = exampleSpecs[name];
+            it("" + name + " was setup", function() {
+              var c, prob;
+              c = new Constrainer;
+              prob = c.problemFor(specs);
+              expect(prob.vars.keys.length).toEqual(specs.length * 2);
+              return console.log(util.inspect(prob, false, 10, true));
+            });
+            _results.push(it("" + name + " is solvable", function() {
+              var c, prob;
+              c = new Constrainer;
+              prob = c.problemFor(specs);
+              prob.solve({
+                onMessage: function(msg, details) {
+                  return console.log(msg, details);
+                }
+              });
+              prob.vars.forEach(function(key, val) {
+                return expect(isNaN(val)).toBe(false);
+              });
+              return console.log(util.inspect(prob, false, 10, true));
+            }));
+          }
+          return _results;
+        });
       });
     });
   });
