@@ -21,6 +21,7 @@
     "jquery" : ">=1.6.0"
   },
   "devDependencies" : {
-    "jasmine-node" : ">=1.0.24"
+    "jasmine-node" : ">=1.0.24",
+    "express" : ">=2.5.9"
   }
 }

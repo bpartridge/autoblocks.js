@@ -4,7 +4,7 @@
 
   SRCDIR = '../src/';
 
-  require([SRCDIR + 'autoblocks', SRCDIR + 'specutils', 'underscore', 'util', './mersenne-twister'], function(Autoblocks, SpecUtils, _, util, MersenneTwister) {
+  require([SRCDIR + 'autoblocks', SRCDIR + 'specutils', 'underscore', 'util', '../spec/mersenne-twister'], function(Autoblocks, SpecUtils, _, util, MersenneTwister) {
     return describe('autoblocks', function() {
       var inst;
       inst = null;
@@ -192,40 +192,44 @@
           ],
           big1: generateBigTree(10),
           big2: generateBigTree(10),
-          big3: generateBigTree(15)
+          big3: generateBigTree(15),
+          big4: generateBigTree(20)
         };
         describe('constrainer', function() {
           var Constrainer;
           Constrainer = Autoblocks.Constrainers.TreeConstrainer;
           return _(exampleSpecs).each(function(specs, name) {
-            it("" + name + " was setup", function() {
+            return it("" + name + " was setup", function() {
               var c, prob;
               c = new Constrainer;
               prob = c.problemFor(specs);
               return expect(prob.vars.keys.length).toBe(specs.length * 2);
             });
-            return it("" + name + " is solvable", function() {
-              var c, nonzero, objValues, prob;
-              c = new Constrainer;
-              prob = c.problemFor(specs);
-              objValues = [];
-              prob.solve({
-                onMessage: function(msg, details) {
-                  var obj, vars;
-                  if (msg === 'updateProblem') {
-                    vars = details[0], obj = details[1];
-                    return objValues.push(obj);
-                  }
-                },
-                randomizePerturbations: false
-              });
-              expect(prob.vars.data).not.toHaveNaNValues();
-              if (specs.length > 1) {
-                return nonzero = _(prob.vars.data).chain().values().any(function(val) {
-                  return val > 0;
-                }).value();
-              }
-            });
+            /*
+                      it "#{name} is solvable", ->
+                        c = new Constrainer
+                        prob = c.problemFor specs
+                        objValues = []
+                        prob.solve
+                          onMessage: (msg, details) ->
+                            if msg == 'updateProblem'
+                              [vars, obj] = details
+                              objValues.push obj
+                          randomizePerturbations: false
+            
+                        expect(prob.vars.data).not.toHaveNaNValues()
+            
+                        if specs.length > 1
+                          nonzero = _(prob.vars.data).chain()
+                            .values().any((val) -> val > 0).value()
+                          # expect(nonzero).toBe true
+            
+                        # console.log objValues
+                        # console.log util.inspect prob, false, 10, true
+                        # console.log ''
+                        # console.log specs
+                        # console.log util.inspect prob.constraints.data, false, 10, true
+            */
           });
         });
         return describe('full', function() {

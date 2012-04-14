@@ -1,7 +1,8 @@
 SRCDIR = '../src/'
 
-require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util', './mersenne-twister'], 
+require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util', '../spec/mersenne-twister'], 
 (Autoblocks, SpecUtils, _, util, MersenneTwister) ->
+
   describe 'autoblocks', ->
     # inst is the default instance, it can be overridden in suites
     inst = null
@@ -106,6 +107,7 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util', './merse
         big1: generateBigTree(10)
         big2: generateBigTree(10)
         big3: generateBigTree(15)
+        big4: generateBigTree(20)
 
       describe 'constrainer', ->
         Constrainer = Autoblocks.Constrainers.TreeConstrainer
@@ -117,6 +119,7 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util', './merse
             expect(prob.vars.keys.length).toBe (specs.length*2)
             # console.log util.inspect prob, false, 10, true
 
+          ###
           it "#{name} is solvable", ->
             c = new Constrainer
             prob = c.problemFor specs
@@ -140,7 +143,7 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util', './merse
             # console.log ''
             # console.log specs
             # console.log util.inspect prob.constraints.data, false, 10, true
-
+          ###
       describe 'full', ->
         _(exampleSpecs).each (specs, name) ->
           it "#{name} does full updates", ->

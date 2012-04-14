@@ -1,4 +1,6 @@
-lib/
+/lib/
 *.sublime-*
 node_modules/
 .DS_Store
+server/built.js
+npm-debug.log
