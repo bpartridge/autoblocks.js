@@ -1,12 +1,10 @@
 (function() {
-  var SRCDIR, define,
+  var SRCDIR,
     __hasProp = Object.prototype.hasOwnProperty;
 
-  if (typeof define !== 'function' && module) define = require('amdefine')(module);
+  SRCDIR = '../src/';
 
-  SRCDIR = '../../../../src/';
-
-  define([SRCDIR + 'autoblocks', 'underscore', 'util'], function(Autoblocks, _, util) {
+  require([SRCDIR + 'autoblocks', 'underscore', 'util'], function(Autoblocks, _, util) {
     return describe('autoblocks', function() {
       var inst;
       inst = null;
@@ -148,7 +146,7 @@
             }
           ]
         };
-        return describe('constrainer', function() {
+        describe('constrainer', function() {
           var Constrainer, name, specs, _results;
           Constrainer = Autoblocks.Constrainers.TreeConstrainer;
           _results = [];
@@ -166,16 +164,22 @@
               c = new Constrainer;
               prob = c.problemFor(specs);
               prob.solve({
-                onMessage: function(msg, details) {
-                  return console.log(msg, details);
-                },
                 randomizePerturbations: true
               });
-              prob.vars.forEach(function(key, val) {
+              return prob.vars.forEach(function(key, val) {
                 return expect(isNaN(val)).toBe(false);
               });
-              return console.log(util.inspect(prob, false, 10, true));
             }));
+          }
+          return _results;
+        });
+        return describe('full', function() {
+          var name, specs, _results;
+          _results = [];
+          for (name in exampleSpecs) {
+            if (!__hasProp.call(exampleSpecs, name)) continue;
+            specs = exampleSpecs[name];
+            _results.push(it("" + name + " does full updates", function() {}));
           }
           return _results;
         });

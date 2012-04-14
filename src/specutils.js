@@ -1,7 +1,4 @@
 (function() {
-  var define;
-
-  if (typeof define !== 'function' && module) define = require('amdefine')(module);
 
   define(function(require) {
     var SortedTable, Table, utils, _, _ref;

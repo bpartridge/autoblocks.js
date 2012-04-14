@@ -1,11 +1,9 @@
 (function() {
-  var SRCDIR, define;
+  var SRCDIR;
 
-  if (typeof define !== 'function' && module) define = require('amdefine')(module);
+  SRCDIR = '../src/';
 
-  SRCDIR = '../../../../src/';
-
-  define([SRCDIR + 'specutils', 'underscore'], function(SpecUtils, _) {
+  require([SRCDIR + 'specutils', 'underscore'], function(SpecUtils, _) {
     describe('specutils pairs', function() {
       var source, spy;
       source = ['a', 'b', 'c'];

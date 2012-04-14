@@ -1,7 +1,3 @@
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
-
 // Based on http://blog.jcoglan.com/2010/10/18/i-am-a-fast-loop/
 // Updated to use underscore, and allow method chaining
 define(function(require) {

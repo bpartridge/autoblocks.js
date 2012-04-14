@@ -1,8 +1,5 @@
 (function() {
-  var define,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  if (typeof define !== 'function' && module) define = require('amdefine')(module);
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   define(function(require) {
     var Autoblocks;

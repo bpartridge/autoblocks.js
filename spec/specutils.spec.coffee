@@ -1,9 +1,6 @@
-if (typeof define != 'function' && module)
-  define = require('amdefine')(module)
+SRCDIR = '../src/'
 
-SRCDIR = '../../../../src/' # TODO: this is a horrid hack
-
-define [SRCDIR+'specutils', 'underscore'], (SpecUtils, _) ->
+require [SRCDIR+'specutils', 'underscore'], (SpecUtils, _) ->
 
   describe 'specutils pairs', ->
     source = ['a','b','c']

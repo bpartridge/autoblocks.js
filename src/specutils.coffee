@@ -1,6 +1,3 @@
-if (typeof define != 'function' && module)
-  define = require('amdefine')(module)
-
 define (require) ->
 
   _ = require 'underscore'

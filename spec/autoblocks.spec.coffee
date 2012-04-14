@@ -1,9 +1,6 @@
-if (typeof define != 'function' && module)
-  define = require('amdefine')(module)
+SRCDIR = '../src/'
 
-SRCDIR = '../../../../src/' # TODO: this is a horrid hack
-
-define [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
+require [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
   describe 'autoblocks', ->
     # inst is the default instance, it can be overridden in suites
     inst = null
@@ -90,9 +87,14 @@ define [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
             c = new Constrainer
             prob = c.problemFor specs
             prob.solve
-              onMessage: (msg, details) -> console.log msg, details
+              # onMessage: (msg, details) -> console.log msg, details
               randomizePerturbations: true
             prob.vars.forEach (key, val) ->
               expect(isNaN(val)).toBe false
 
-            console.log util.inspect prob, false, 10, true
+            # console.log util.inspect prob, false, 10, true
+
+      describe 'full', ->
+        for own name, specs of exampleSpecs
+          it "#{name} does full updates", ->
+
