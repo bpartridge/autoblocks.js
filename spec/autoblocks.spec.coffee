@@ -57,24 +57,24 @@ define [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
 
     describe 'treeExamples', ->
       exampleSpecs =
-        # empty: []
-        # singleNode: [
-        #   {id:'foo', width:20, height:30}
-        # ]
+        empty: []
+        singleNode: [
+          {id:'foo', width:20, height:30}
+        ]
         parallelRoots: [
           {id:'foo', width:5, height:10},
           {id:'bar', width:10, height:20}
         ]
-        # parentChild: [
-        #   {id:'foo', width:0, height:0, children:['bar']},
-        #   {id:'bar', width:0, height:0}
-        # ]
-        # complicated: [
-        #   {id:'foo', width:20, height:30, children:['bar','baz']},
-        #   {id:'bar', width:40, height:10},
-        #   {id:'baz', width:10, height:40, children:['bazz']},
-        #   {id:'bazz', width:30, height:30}
-        # ]
+        parentChild: [
+          {id:'foo', width:20, height:30, children:['bar']},
+          {id:'bar', width:40, height:10}
+        ]
+        complicated: [
+          {id:'foo', width:20, height:30, children:['bar','baz']},
+          {id:'bar', width:40, height:10},
+          {id:'baz', width:10, height:40, children:['bazz']},
+          {id:'bazz', width:30, height:30}
+        ]
 
       describe 'constrainer', ->
         Constrainer = Autoblocks.Constrainers.TreeConstrainer
@@ -83,7 +83,7 @@ define [SRCDIR+'autoblocks', 'underscore', 'util'], (Autoblocks, _, util) ->
           it "#{name} was setup", ->
             c = new Constrainer
             prob = c.problemFor specs
-            expect(prob.vars.keys.length).toBeGreaterThan (specs.length-1)
+            expect(prob.vars.keys.length).toBe (specs.length*2)
             # console.log util.inspect prob, false, 10, true
 
           it "#{name} is solvable", ->

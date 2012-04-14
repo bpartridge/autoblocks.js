@@ -95,6 +95,14 @@
       return describe('treeExamples', function() {
         var exampleSpecs;
         exampleSpecs = {
+          empty: [],
+          singleNode: [
+            {
+              id: 'foo',
+              width: 20,
+              height: 30
+            }
+          ],
           parallelRoots: [
             {
               id: 'foo',
@@ -104,6 +112,39 @@
               id: 'bar',
               width: 10,
               height: 20
+            }
+          ],
+          parentChild: [
+            {
+              id: 'foo',
+              width: 20,
+              height: 30,
+              children: ['bar']
+            }, {
+              id: 'bar',
+              width: 40,
+              height: 10
+            }
+          ],
+          complicated: [
+            {
+              id: 'foo',
+              width: 20,
+              height: 30,
+              children: ['bar', 'baz']
+            }, {
+              id: 'bar',
+              width: 40,
+              height: 10
+            }, {
+              id: 'baz',
+              width: 10,
+              height: 40,
+              children: ['bazz']
+            }, {
+              id: 'bazz',
+              width: 30,
+              height: 30
             }
           ]
         };
@@ -118,7 +159,7 @@
               var c, prob;
               c = new Constrainer;
               prob = c.problemFor(specs);
-              return expect(prob.vars.keys.length).toBeGreaterThan(specs.length - 1);
+              return expect(prob.vars.keys.length).toBe(specs.length * 2);
             });
             _results.push(it("" + name + " is solvable", function() {
               var c, prob;
