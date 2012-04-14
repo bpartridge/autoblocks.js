@@ -9,7 +9,10 @@ define (require) ->
 
     update: =>
       specs = @binder.specs()
-      problem = @constrainer.problemFor(specs)
+      problem = @constrainer.problemFor specs
+      problem.solve()
+      updates = @constrainer.updatesFrom problem
+      @binder.onUpdates updates
 
     @Binders: require './binders'
     @Constrainers: require './constrainers'

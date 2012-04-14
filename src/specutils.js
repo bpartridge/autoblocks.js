@@ -48,7 +48,32 @@
         }
       }
     };
-    utils.collide = function(specs) {};
+    utils.pickRandom = function(array, count) {
+      var i;
+      if (count == null) count = 1;
+      return (function() {
+        var _results;
+        _results = [];
+        for (i = 1; 1 <= count ? i <= count : i >= count; 1 <= count ? i++ : i--) {
+          _results.push(array[Math.floor(Math.random() * array.length)]);
+        }
+        return _results;
+      })();
+    };
+    utils.collide = function(specs) {
+      var pairs;
+      pairs = [];
+      utils.forAllPairs(specs, function(first, second) {
+        return pairs.push([first, second]);
+      });
+      return _(pairs).any(function(pair) {
+        var dx, dy, first, second;
+        first = pair[0], second = pair[1];
+        dx = Math.abs(first.centroid.x - second.centroid.x);
+        dy = Math.abs(first.centroid.y - second.centroid.y);
+        return dx < (first.width + second.width) / 2 && dy < (first.height + second.height) / 2;
+      });
+    };
     utils.rootsFor = function(specs) {
       var allChildren, allIds, rootIds;
       allChildren = _(specs).chain().pluck('children').flatten().value();

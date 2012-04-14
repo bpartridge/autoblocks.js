@@ -45,6 +45,7 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
         it "#{constrainerName} should follow the interface", ->
           c = new Constrainer
           expect(c).toHaveMethod 'problemFor'
+          expect(c).toHaveMethod 'updatesFrom'
 
         it "#{constrainerName} should handle a blank spec list", ->
           c = new Constrainer
@@ -53,6 +54,16 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
           expect(prob.objCoeffs.empty()).toEqual true
 
     describe 'treeExamples', ->
+      generateBigTree = (size) ->
+        specs = []
+        for i in [1..10]
+          parent = _(SpecUtils.pickRandom specs).first()
+          curr = {id:"id#{i}", width:Math.random()*20, height:Math.random()*20}
+          specs.push curr
+          if parent? then (parent.children ||= []).push curr.id
+        # console.log specs
+        return specs
+
       exampleSpecs =
         empty: []
         singleNode: [
@@ -72,6 +83,7 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
           {id:'baz', width:10, height:40, children:['bazz']},
           {id:'bazz', width:30, height:30}
         ]
+        big: generateBigTree(10)
 
       describe 'constrainer', ->
         Constrainer = Autoblocks.Constrainers.TreeConstrainer
@@ -92,16 +104,32 @@ require [SRCDIR+'autoblocks', SRCDIR+'specutils', 'underscore', 'util'], (Autobl
               #   if msg == 'updateProblem'
               #     [vars, obj] = details
               #     objValues.push obj
-              randomizePerturbations: true
+              randomizePerturbations: false
 
             prob.vars.forEach (key, val) ->
               expect(isNaN(val)).toBe false
+
+            if specs.length > 1
+              nonzero = _(prob.vars.data).chain()
+                .values().any((val) -> val > 0).value()
+              expect(nonzero).toBe true
 
             # console.log objValues, prob.vars
             # console.log util.inspect prob, false, 10, true
             # console.log prob.objective
 
       describe 'full', ->
-        for own name, specs of exampleSpecs
+        _(exampleSpecs).each (specs, name) ->
           it "#{name} does full updates", ->
+            specs = _.clone(specs)
+            inst.bind specs
+            inst.update()
 
+            expect(_(specs).all (spec) -> spec.centroid?).toBe true
+            if specs.length > 1
+              nonzero = _(specs).any (spec) -> 
+                spec.centroid.x > 0 || spec.centroid.y > 0
+              expect(nonzero).toBe true
+
+            expect(SpecUtils.collide specs).toBe false
+            

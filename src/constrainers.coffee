@@ -18,6 +18,17 @@ define (require) ->
       @processDepth(prob, specs)
       return prob
 
+    updatesFrom: (prob) ->
+      updates = {}
+      prob.vars.forEach (key, value) ->
+        match = /^(.+)_([xy])$/.exec key
+        if match
+          [full, id, prop] = match
+          update = updates[id] ||= {id:id}
+          update.centroid ?= {}
+          update.centroid[prop] = value
+      return _(updates).values()
+
     depthLabel: (id) -> if @isDepthY then "#{id}_y" else "#{id}_x"
     breadthLabel: (id) -> if @isDepthY then "#{id}_x" else "#{id}_y"
     depthFor: (spec) -> if @isDepthY then spec.height else spec.width

@@ -25,6 +25,24 @@
         return prob;
       };
 
+      TreeConstrainer.prototype.updatesFrom = function(prob) {
+        var updates;
+        updates = {};
+        prob.vars.forEach(function(key, value) {
+          var full, id, match, prop, update;
+          match = /^(.+)_([xy])$/.exec(key);
+          if (match) {
+            full = match[0], id = match[1], prop = match[2];
+            update = updates[id] || (updates[id] = {
+              id: id
+            });
+            if (update.centroid == null) update.centroid = {};
+            return update.centroid[prop] = value;
+          }
+        });
+        return _(updates).values();
+      };
+
       TreeConstrainer.prototype.depthLabel = function(id) {
         if (this.isDepthY) {
           return "" + id + "_y";

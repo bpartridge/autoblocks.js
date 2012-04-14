@@ -78,7 +78,8 @@
           it("" + constrainerName + " should follow the interface", function() {
             var c;
             c = new Constrainer;
-            return expect(c).toHaveMethod('problemFor');
+            expect(c).toHaveMethod('problemFor');
+            return expect(c).toHaveMethod('updatesFrom');
           });
           _results.push(it("" + constrainerName + " should handle a blank spec list", function() {
             var c, prob;
@@ -91,7 +92,24 @@
         return _results;
       });
       return describe('treeExamples', function() {
-        var exampleSpecs;
+        var exampleSpecs, generateBigTree;
+        generateBigTree = function(size) {
+          var curr, i, parent, specs;
+          specs = [];
+          for (i = 1; i <= 10; i++) {
+            parent = _(SpecUtils.pickRandom(specs)).first();
+            curr = {
+              id: "id" + i,
+              width: Math.random() * 20,
+              height: Math.random() * 20
+            };
+            specs.push(curr);
+            if (parent != null) {
+              (parent.children || (parent.children = [])).push(curr.id);
+            }
+          }
+          return specs;
+        };
         exampleSpecs = {
           empty: [],
           singleNode: [
@@ -144,7 +162,8 @@
               width: 30,
               height: 30
             }
-          ]
+          ],
+          big: generateBigTree(10)
         };
         describe('constrainer', function() {
           var Constrainer;
@@ -157,27 +176,43 @@
               return expect(prob.vars.keys.length).toBe(specs.length * 2);
             });
             return it("" + name + " is solvable", function() {
-              var c, prob;
+              var c, nonzero, prob;
               c = new Constrainer;
               prob = c.problemFor(specs);
               prob.solve({
-                randomizePerturbations: true
+                randomizePerturbations: false
               });
-              return prob.vars.forEach(function(key, val) {
+              prob.vars.forEach(function(key, val) {
                 return expect(isNaN(val)).toBe(false);
               });
+              if (specs.length > 1) {
+                nonzero = _(prob.vars.data).chain().values().any(function(val) {
+                  return val > 0;
+                }).value();
+                return expect(nonzero).toBe(true);
+              }
             });
           });
         });
         return describe('full', function() {
-          var name, specs, _results;
-          _results = [];
-          for (name in exampleSpecs) {
-            if (!__hasProp.call(exampleSpecs, name)) continue;
-            specs = exampleSpecs[name];
-            _results.push(it("" + name + " does full updates", function() {}));
-          }
-          return _results;
+          return _(exampleSpecs).each(function(specs, name) {
+            return it("" + name + " does full updates", function() {
+              var nonzero;
+              specs = _.clone(specs);
+              inst.bind(specs);
+              inst.update();
+              expect(_(specs).all(function(spec) {
+                return spec.centroid != null;
+              })).toBe(true);
+              if (specs.length > 1) {
+                nonzero = _(specs).any(function(spec) {
+                  return spec.centroid.x > 0 || spec.centroid.y > 0;
+                });
+                expect(nonzero).toBe(true);
+              }
+              return expect(SpecUtils.collide(specs)).toBe(false);
+            });
+          });
         });
       });
     });

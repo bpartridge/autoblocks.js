@@ -16,9 +16,12 @@
       };
 
       Autoblocks.prototype.update = function() {
-        var problem, specs;
+        var problem, specs, updates;
         specs = this.binder.specs();
-        return problem = this.constrainer.problemFor(specs);
+        problem = this.constrainer.problemFor(specs);
+        problem.solve();
+        updates = this.constrainer.updatesFrom(problem);
+        return this.binder.onUpdates(updates);
       };
 
       Autoblocks.Binders = require('./binders');

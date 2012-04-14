@@ -19,7 +19,20 @@ define (require) ->
           for second, j in array[(i+1)..]
             func first, second, i, i+1+j
 
+  utils.pickRandom = (array, count) ->
+    count ?= 1
+    return (array[Math.floor(Math.random()*array.length)] for i in [1..count])
+
   utils.collide = (specs) ->
+    pairs = []
+    utils.forAllPairs specs, (first, second) ->
+      pairs.push [first, second]
+    return _(pairs).any (pair) ->
+      [first, second] = pair
+      dx = Math.abs(first.centroid.x - second.centroid.x)
+      dy = Math.abs(first.centroid.y - second.centroid.y)
+      return dx < (first.width + second.width)/2 &&
+        dy < (first.height + second.height)/2
 
   utils.rootsFor = (specs) ->
     allChildren = _(specs).chain().pluck('children').flatten().value()

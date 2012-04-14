@@ -5,32 +5,41 @@ define (require) ->
   {Table, SortedTable} = require './tables'
 
   class ObjectBinder
-    constructor: ->
+    constructor: (options) ->
+      @options = _.extend(@defaults, options)
       @bound = new SortedTable
 
+    defaults: {}
+
     # Accepts a single object of the custom type.
-    # Returns success (not a duplicate)
     bind: (obj) =>
-      if _.any(@bound, (val) -> val is obj) then return false
-      @bound.put (obj.id || _.uniqueId()), obj
-      return true
+      arr = if _.isArray(obj) then obj else [obj]
+      for item in arr
+        if not _.any(@bound, (val) -> val is item)
+          @bound.put (item.id || _.uniqueId()), item
 
     specs: =>
       res = []
-      for own key, obj of @bound.data
+      for own key, value of @bound.data
         res.push _({}).extend(value, {id:key})
       return res
 
     onUpdates: (updates) =>
       for update in updates
         obj = @bound.get update.id
-        obj.centroid = update.centroid
+        _.extend(obj.centroid ?= {}, update.centroid)
 
   class JQueryBinder extends ObjectBinder
 
-    # bind takes a single DOM element.
-    # Can be called with `$(selector).each -> binder.bind(this)`
-    # bind: ObjectBinder::bind
+    defaults:
+      abClass: 'ab-block'
+      idClassPrefix: 'ab-id-'
+      childClassPrefix: 'ab-child-'
+
+    # bind takes a jQuery object of a containing element.
+    # Any of its children with the class @options.abClass, default 'ab-block',
+    # will generate a spec when specs is called.
+
 
     specs: =>
       specs = []
@@ -42,6 +51,11 @@ define (require) ->
           width: $e.outerWidth()
           height: $e.outerHeight()
           centroid: {}
+        for c in $e.attr('class').split /\s+/
+          if c.indexOf @options.childClassPrefix == 0
+            childId = c.substring(@options.childClassPrefix.length)
+            spec.children ||= []
+            spec.children.push childId
         spec.centroid.x = pos.left + spec.width / 2
         spec.centroid.y = pos.top + spec.height / 2
         specs.push spec
@@ -53,10 +67,10 @@ define (require) ->
         $e = $(elem)
         width = $e.outerWidth()
         height = $e.outerHeight()
-        $e.css
-          position: 'absolute'
-          left: update.x - width / 2
-          top: update.y - width / 2
+        if (x = update.centroid?.x)?
+          $e.css left: x - width/2
+        if (y = update.centroid?.y)?
+          $e.css top: y - height/2
 
   return {
     ObjectBinder: ObjectBinder
