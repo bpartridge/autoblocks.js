@@ -1,5 +1,5 @@
 (function() {
-  var app, config, express, fs, http, requirejs;
+  var NODE_MODULES_DIR, app, config, express, fs, http, requirejs;
 
   requirejs = require('requirejs');
 
@@ -9,10 +9,12 @@
 
   express = require('express');
 
+  NODE_MODULES_DIR = '../node_modules/';
+
   config = {
     baseUrl: __dirname,
     paths: {
-      requireLib: 'lib/require',
+      requireLib: NODE_MODULES_DIR + 'requirejs/require',
       underscore: 'lib/underscore',
       jquery: 'lib/jquery-1.6.1-min',
       util: 'lib/fake-util',

@@ -3,10 +3,11 @@ http = require 'http'
 fs = require 'fs'
 express = require 'express'
 
+NODE_MODULES_DIR = '../node_modules/'
 config =
   baseUrl: __dirname
   paths:
-    requireLib: 'lib/require'
+    requireLib: NODE_MODULES_DIR+'requirejs/require'
     underscore: 'lib/underscore'
     jquery: 'lib/jquery-1.6.1-min'
     util: 'lib/fake-util'
