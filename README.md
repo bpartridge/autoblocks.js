@@ -47,4 +47,4 @@ In the main directory:
 
 [1]: http://web.archive.org/web/20061217004330/http://www.princeton.edu/~rvdb/LPbook/online.html
 [2]: http://sylvester.jcoglan.com/
-[3]: http://pivotal.github.com/jasmine/
+[3]: https://jasmine.github.io/
